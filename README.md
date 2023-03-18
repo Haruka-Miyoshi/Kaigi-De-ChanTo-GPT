@@ -14,13 +14,14 @@
 ```
 
 ### **試験中の様子**
-* 単純な文章入力の例
-
+#### 単純な文章入力の例
+* ネット落ちていた文章を適当に拾ってきたやつを入力した例
 <!-- fig1 -->
 <p><div align = "center"><img src="figs/text.png" width = "200px" height = "400px" title ="単純な文章入力の例"></div></p>
 <p><h3><div align="center">図1.1 単純な文章入力の例</h3></div></p>
 
-* 録音データの例
+#### 録音データの例
+* 録音データには『こんにちは』という音声が入っている.
 <!-- fig2 -->
 <p><div align = "center"><img src="figs/speech.png" width = "400px" height = "200px" title ="録音データの例"></div></p>
 <p><h3><div align="center">図1.2 録音データの例</h3></div></p>
@@ -28,3 +29,4 @@
 ### **方針**
 * 運用を検討中
 * 需要があれば，ちゃんとしたserverを借りたいと思います…
+* 他に追加機能などがあれば，検討したいです．
