@@ -17,12 +17,12 @@
 * 単純な文章入力の例
 
 <!-- fig1 -->
-<p><div align = "center"><img src="figs/text.png" width = "600px" height = "400px" title ="単純な文章入力の例"></div></p>
+<p><div align = "center"><img src="figs/text.png" width = "200px" height = "400px" title ="単純な文章入力の例"></div></p>
 <p><h3><div align="center">図1.1 単純な文章入力の例</h3></div></p>
 
 * 録音データの例
 <!-- fig2 -->
-<p><div align = "center"><img src="figs/speech.png" width = "600px" height = "400px" title ="録音データの例"></div></p>
+<p><div align = "center"><img src="figs/speech.png" width = "200px" height = "400px" title ="録音データの例"></div></p>
 <p><h3><div align="center">図1.2 録音データの例</h3></div></p>
 
 ### **方針**
