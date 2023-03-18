@@ -22,7 +22,7 @@
 
 * 録音データの例
 <!-- fig2 -->
-<p><div align = "center"><img src="figs/speech.png" width = "200px" height = "400px" title ="録音データの例"></div></p>
+<p><div align = "center"><img src="figs/speech.png" width = "400px" height = "200px" title ="録音データの例"></div></p>
 <p><h3><div align="center">図1.2 録音データの例</h3></div></p>
 
 ### **方針**
