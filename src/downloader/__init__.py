@@ -9,7 +9,7 @@ from linebot import LineBotApi
 
 import os
 
-if os.path.exists('./data'):
+if not os.path.exists('./data'):
     os.mkdir('./data')
 
 # 環境変数取得
@@ -40,6 +40,12 @@ class Downloader:
         # 音声データの場合
         if event_type == 'audio':
             file_path = self.file_path + '/audio/' + time + self.audio_filename
+            with open(file_path, 'wb') as fd:
+                for chunk in message_content.iter_content():
+                    fd.write(chunk)
+        
+        elif event_type == 'video':
+            file_path = self.file_path + '/video/' + time + self.video_filename
             with open(file_path, 'wb') as fd:
                 for chunk in message_content.iter_content():
                     fd.write(chunk)

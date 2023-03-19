@@ -10,15 +10,21 @@ import os
 from downloader import Downloader
 from api import ChatAPI
 from speech import SpeechRecognition
+from video import VideoToText
 
 # インスタンス
 app = Flask(__name__)
 dl = Downloader()
 
 CONTEXT_PATH = './content.txt'
-gpt = ChatAPI(CONTEXT_PATH)
+# contextファイルを読み込み
+f = open(CONTEXT_PATH, 'r', encoding='UTF-8')
+# テキストを読み込み
+context = f.read()
+gpt = ChatAPI(context)
 
 speech_to_text = SpeechRecognition()
+video_to_text = VideoToText()
 
 # 環境変数取得
 YOUR_CHANNEL_ACCESS_TOKEN = os.environ["TOKEN"]
@@ -63,10 +69,30 @@ def handle_audio(event):
     # イベントからIDとイベント種類を取得
     id = event.message.id
     event_type = event.message.type
-    # wavファイルで保存する
+    # m4aファイルで保存する
     file_path = dl.get_file(id, event_type)
     # 音声認識
     conv_text = speech_to_text.get_text(file_path)
+
+    # chatGPTに投げる
+    text_message = gpt.run(conv_text)
+
+    line_bot_api.reply_message(
+        event.reply_token, 
+        TextSendMessage(text=text_message)
+        )
+
+# ビデオメッセージが送信された場合
+@handler.add(MessageEvent, message=VideoMessage)
+def handle_audio(event):
+    # イベントからIDとイベント種類を取得
+    id = event.message.id
+    event_type = event.message.type
+    # ファイルで保存する
+    file_path = dl.get_file(id, event_type)
+
+    # 動画から文字起こし
+    conv_text = video_to_text.get_text(file_path)
 
     # chatGPTに投げる
     text_message = gpt.run(conv_text)
