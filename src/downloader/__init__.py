@@ -11,6 +11,9 @@ import os
 
 if not os.path.exists('./data'):
     os.mkdir('./data')
+    os.mkdir('./data/audio')
+    os.mkdir('./data/video')
+    os.mkdir('./data/image')
 
 # 環境変数取得
 YOUR_CHANNEL_ACCESS_TOKEN = os.environ["TOKEN"]
