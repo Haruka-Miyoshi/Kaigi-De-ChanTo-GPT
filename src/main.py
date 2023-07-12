@@ -1,31 +1,36 @@
-from flask import Flask, request, abort
+import os
+import uvicorn
+import nest_asyncio
+from pyngrok import ngrok
+from fastapi import FastAPI, Header, Request
+from fastapi.middleware.cors import CORSMiddleware
+
 from linebot import ( LineBotApi, WebhookHandler )
 from linebot.exceptions import ( InvalidSignatureError )
 from linebot.models import ( MessageEvent, AudioMessage, ImageMessage, VideoMessage, TextMessage, TextSendMessage )
+from starlette.exceptions import HTTPException
+
+from api import ChatAPI
+from video import VideoToText
+from downloader import Downloader
+from speech import SpeechRecognition
 
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
-from downloader import Downloader
-from api import ChatAPI
-from speech import SpeechRecognition
-from video import VideoToText
-
-# インスタンス
-app = Flask(__name__)
+# ライブラリインポート
 dl = Downloader()
-
-CONTEXT_PATH = './content.txt'
-# contextファイルを読み込み
-f = open(CONTEXT_PATH, 'r', encoding='UTF-8')
-# テキストを読み込み
-context = f.read()
-gpt = ChatAPI(context)
-
 speech_to_text = SpeechRecognition()
 video_to_text = VideoToText()
 
+### プロンプトを読み込み
+CONTEXT_PATH = './prompt/content.txt'
+prompt = open(CONTEXT_PATH, 'r', encoding='UTF-8')
+context = prompt.read()
+# ChatGPTインスタンス生成
+gpt = ChatAPI(context)
+
+### LINE側の設定
 # 環境変数取得
 YOUR_CHANNEL_ACCESS_TOKEN = os.environ["TOKEN"]
 YOUR_CHANNEL_SECRET = os.environ["SECRET"]
@@ -33,23 +38,35 @@ YOUR_CHANNEL_SECRET = os.environ["SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
-# コールバック関数
-@app.route("/callback", methods=['POST'])
-def callback():
-    # get X-Line-Signature header value
-    signature = request.headers['X-Line-Signature']
+app=FastAPI(title="linebot-sample", description="This is sample of LINE Bot.")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
-    # get request body as text
-    body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
+@app.get('/')
+async def root():
+    return {"title": app.title, "description": app.description}
 
-    # handle webhook body
+@app.post(
+    "/callback",
+    summary="LINE Message APIからのコールバックです。",
+    description="ユーザーからメッセージが送信された際、LINE Message APIからこちらのメソッドが呼び出されます。",
+)
+async def callback(request: Request, x_line_signature=Header(None)):
+
+    body = await request.body()
+
     try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+        handler.handle(body.decode("utf-8"), x_line_signature)
 
-    return 'OK'
+    except InvalidSignatureError:
+        raise HTTPException(status_code=400, detail="InvalidSignatureError")
+
+    return "OK"
 
 # テキストメッセージが送信された場合
 @handler.add(MessageEvent, message=TextMessage)
@@ -102,7 +119,9 @@ def handle_audio(event):
         TextSendMessage(text=text_message)
         )
 
-# 実行文
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
-    app.run(debug=False, host='0.0.0.0', port=8000)
+ngrok_auth_token_key=os.environ['NGORK']
+ngrok.set_auth_token(ngrok_auth_token_key)
+ngrok_tunnel = ngrok.connect(8000)
+print('Public URL:', ngrok_tunnel.public_url)
+nest_asyncio.apply()
+uvicorn.run(app, port=8000)
